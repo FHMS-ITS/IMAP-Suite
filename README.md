@@ -48,6 +48,7 @@ Die Auswahl des Earley-Parser basiert darauf, dass mit diesem Algorithmus sämtl
 Die gewählte Parsing Library ist lark-parser. Die Library unterstützt den Early-Alrgorithmus und das nachbearbeiten des Parsing-Trees. So kann beispielsweise die oben genannte kontextsensitive Regel nach dem Parsen überprüft werden.
 
 ## State-Machine
+Für die Darstellung des nachfolgenden Diagramms ist mermaid notwendig.
 ```mermaid
     graph TB
     a(WaitForGreeting) -->|Greeting| b
