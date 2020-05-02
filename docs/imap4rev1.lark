@@ -1,0 +1,150 @@
+address         : "(" addr_name SP addr_adl SP addr_mailbox SP addr_host ")"
+addr_adl        : nstring
+addr_host       : nstring
+addr_mailbox    : nstring
+addr_name       : nstring
+append          : "APPEND" SP mailbox [SP flag_list] [SP date_time] SP literal
+astring         : ASTRING_CHAR+ | string
+ASTRING_CHAR    : ATOM_CHAR | resp_specials
+atom            : ATOM_CHAR+
+ATOM_CHAR       : /[\x21|\x23-\x24|\x26-\x27|\x2B-\x5B|\x5E-\x7A|\x7C-\x7E]/
+atom_specials   : "(" | ")" | "{" | SP | CTL | list_wildcards | quoted_specials | resp_specials
+authenticate    : "AUTHENTICATE" SP auth_type (CRLF base64)*
+auth_type       : atom
+base64          : (4base64_char)* [base64_terminal]
+base64_char     : ALPHA | DIGIT | "+" | "/"
+base64_terminal : (2base64_char "==") | (3base64_char "=")
+body            : "(" (body_type_1part | body_type_mpart) ")"
+body_extension  : nstring | number | "(" body_extension (SP body_extension)* ")"
+body_ext_1part  : body_fld_md5 [SP body_fld_dsp [SP body_fld_lang [SP body_fld_loc (SP body_extension)*]]]
+body_ext_mpart  : body_fld_param [SP body_fld_dsp [SP body_fld_lang [SP body_fld_loc (SP body_extension)*]]]
+body_fields     : body_fld_param SP body_fld_id SP body_fld_desc SP body_fld_enc SP body_fld_octets
+body_fld_desc   : nstring
+body_fld_dsp    : "(" string SP body_fld_param ")" | nil
+body_fld_enc    : (DQUOTE ("7BIT" | "8BIT" | "BINARY" | "BASE64"/ "QUOTED_PRINTABLE") DQUOTE) | string
+body_fld_id     : nstring
+body_fld_lang   : nstring | "(" string (SP string)* ")"
+body_fld_loc    : nstring
+body_fld_lines  : number
+body_fld_md5    : nstring
+body_fld_octets : number
+body_fld_param  : "(" string SP string (SP string SP string)* ")" | nil
+body_type_1part : (body_type_basic | body_type_msg | body_type_text) [SP body_ext_1part]
+body_type_basic : media_basic SP body_fields
+body_type_mpart : body+ SP media_subtype [SP body_ext_mpart]
+body_type_msg   : media_message SP body_fields SP envelope SP body SP body_fld_lines
+body_type_text  : media_text SP body_fields SP body_fld_lines
+capability      : ("AUTH=" auth_type) | atom
+capability_data : "CAPABILITY" (SP capability)* SP "IMAP4rev1" (SP capability)*
+CHAR8           : /[\x01-\xFF]/
+charset         : atom | quoted
+command         : tag SP (command_any | command_auth | command_nonauth | command_select) CRLF
+command_any     : "CAPABILITY" | "LOGOUT" | "NOOP" | x_command
+command_auth    : append | create | delete | examine | list | lsub | rename | select | status | subscribe | unsubscribe
+command_nonauth : login | authenticate | "STARTTLS"
+command_select  : "CHECK" | "CLOSE" | "EXPUNGE" | copy | fetch | store | uid | search
+continue_req    : "+" SP (resp_text | base64) CRLF
+copy            : "COPY" SP sequence_set SP mailbox
+create          : "CREATE" SP mailbox
+date            : date_text | DQUOTE date_text DQUOTE
+date_day        : DIGIT~1..2
+date_day_fixed  : (SP DIGIT) | DIGIT~2
+date_month      : "Jan" | "Feb" | "Mar" | "Apr" | "May" | "Jun" | "Jul" | "Aug" | "Sep" | "Oct" | "Nov" | "Dec"
+date_text       : date_day "-" date_month "-" date_year
+date_year       : DIGIT~4
+date_time       : DQUOTE date_day_fixed "-" date_month "-" date_year SP time SP zone DQUOTE
+delete          : "DELETE" SP mailbox
+digit_nz        : /[\x31-\x39]/
+envelope        : "(" env_date SP env_subject SP env_from SP env_sender SP env_reply_to SP env_to SP env_cc SP env_bcc SP env_in_reply_to SP env_message_id ")"
+env_bcc         : "(" address+ ")" | nil
+env_cc          : "(" address+ ")" | nil
+env_date        : nstring
+env_from        : "(" address+ ")" | nil
+env_in_reply_to : nstring
+env_message_id  : nstring
+env_reply_to    : "(" address+ ")" | nil
+env_sender      : "(" address+ ")" | nil
+env_subject     : nstring
+env_to          : "(" address+ ")" | nil
+examine         : "EXAMINE" SP mailbox
+fetch           : "FETCH" SP sequence_set SP ("ALL" | "FULL" | "FAST" | fetch_att | "(" fetch_att (SP fetch_att)* ")")
+fetch_att       : "ENVELOPE" | "FLAGS" | "INTERNALDATE" | "RFC822" [".HEADER" | ".SIZE" | ".TEXT"] | "BODY" ["STRUCTURE"] | "UID" | "BODY" section ["<" number "." nz_number ">"] | "BODY.PEEK" section ["<" number "." nz_number ">"]
+flag            : "\Answered" | "\Flagged" | "\Deleted" | "\Seen" | "\Draft" | flag_keyword | flag_extension
+flag_extension  : /[\\]/ atom
+flag_fetch      : flag | "\Recent"
+flag_keyword    : atom
+flag_list       : "(" [flag (SP flag)*] ")"
+flag_perm       : flag | "\*"
+greeting        : "*" SP (resp_cond_auth | resp_cond_bye) CRLF
+header_fld_name : astring
+header_list     : "(" header_fld_name (SP header_fld_name)* ")"
+list            : "LIST" SP mailbox SP list_mailbox
+list_mailbox    : list_char+ | string
+list_char       : ATOM_CHAR | list_wildcards | resp_specials
+list_wildcards  : "%" | "*"
+literal         : "{" number "}" CRLF CHAR8*
+login           : "LOGIN" SP userid SP password
+lsub            : "LSUB" SP mailbox SP list_mailbox
+mailbox         : "INBOX" | astring
+mailbox_data    :  "FLAGS" SP flag_list | "LIST" SP mailbox_list | "LSUB" SP mailbox_list | "SEARCH" (SP nz_number)* | "STATUS" SP mailbox SP "(" [status_att_list] ")" | number SP "EXISTS" | number SP "RECENT"
+mailbox_list    : "(" [mbx_list_flags] ")" SP (DQUOTE QUOTED_CHAR DQUOTE | nil) SP mailbox
+mbx_list_flags  : (mbx_list_oflag SP)* mbx_list_sflag (SP mbx_list_oflag)* | mbx_list_oflag (SP mbx_list_oflag)*
+mbx_list_oflag  : "\Noinferiors" | flag_extension
+mbx_list_sflag  : "\Noselect" | "\Marked" | "\Unmarked"
+media_basic     : ((DQUOTE ("APPLICATION" | "AUDIO" | "IMAGE" | "MESSAGE" | "VIDEO") DQUOTE) | string) SP media_subtype
+media_message   : DQUOTE "MESSAGE" DQUOTE SP DQUOTE "RFC822" DQUOTE
+media_subtype   : string
+media_text      : DQUOTE "TEXT" DQUOTE SP media_subtype
+message_data    : nz_number SP ("EXPUNGE" | ("FETCH" SP msg_att))
+msg_att         : "(" (msg_att_dynamic | msg_att_static) (SP (msg_att_dynamic | msg_att_static))* ")"
+msg_att_dynamic : "FLAGS" SP "(" [flag_fetch (SP flag_fetch)*] ")"
+msg_att_static  : "ENVELOPE" SP envelope | "INTERNALDATE" SP date_time | "RFC822" [".HEADER" | ".TEXT"] SP nstring | "RFC822.SIZE" SP number | "BODY" ["STRUCTURE"] SP body | "BODY" section ["<" number ">"] SP nstring | "UID" SP uniqueid
+nil             : "NIL"
+nstring         : string | nil
+number          : DIGIT+
+nz_number       : digit_nz DIGIT*
+password        : astring
+quoted          : DQUOTE QUOTED_CHAR* DQUOTE
+QUOTED_CHAR     : (/[\x01-\x09|\x0B-\x0C|\x0E-\x21|\x23-\x5B|\]-\x7F]/) | /[\\]/ quoted_specials
+quoted_specials : DQUOTE | /[\\]/
+rename          : "RENAME" SP mailbox SP mailbox
+response        : (continue_req | response_data)* response_done
+response_data   : "*" SP (resp_cond_state | resp_cond_bye | mailbox_data | message_data | capability_data) CRLF
+response_done   : response_tagged | response_fatal
+response_fatal  : "*" SP resp_cond_bye CRLF
+response_tagged : tag SP resp_cond_state CRLF
+resp_cond_auth  : ("OK" | "PREAUTH") SP resp_text
+resp_cond_bye   : "BYE" SP resp_text
+resp_cond_state : ("OK" | "NO" | "BAD") SP resp_text
+resp_specials   : "]"
+resp_text       : ["[" resp_text_code "]" SP] text
+resp_text_code  : "ALERT" | "BADCHARSET" [SP "(" charset (SP charset)* ")" ] | capability_data | "PARSE" | "PERMANENTFLAGS" SP "(" [flag_perm (SP flag_perm)*] ")" | "READ_ONLY" | "READ_WRITE" | "TRYCREATE" | "UIDNEXT" SP nz_number | "UIDVALIDITY" SP nz_number | "UNSEEN" SP nz_number | atom [SP (/[\x01-\x09|\x0B-\x0C|\x0E-\x5C|\x5E-\x7F]/)+]
+search          : "SEARCH" [SP "CHARSET" SP charset] (SP search_key)+
+search_key      : "ALL" | "ANSWERED" | "BCC" SP astring | "BEFORE" SP date | "BODY" SP astring | "CC" SP astring | "DELETED" | "FLAGGED" | "FROM" SP astring | "KEYWORD" SP flag_keyword | "NEW" | "OLD" | "ON" SP date | "RECENT" | "SEEN" | "SINCE" SP date | "SUBJECT" SP astring | "TEXT" SP astring | "TO" SP astring | "UNANSWERED" | "UNDELETED" | "UNFLAGGED" | "UNKEYWORD" SP flag_keyword | "UNSEEN" | "DRAFT" | "HEADER" SP header_fld_name SP astring | "LARGER" SP number | "NOT" SP search_key | "OR" SP search_key SP search_key | "SENTBEFORE" SP date | "SENTON" SP date | "SENTSINCE" SP date | "SMALLER" SP number | "UID" SP sequence_set | "UNDRAFT" | sequence_set | "(" search_key (SP search_key)* ")"
+section         : "[" [section_spec] "]"
+section_msgtext : "HEADER" | "HEADER.FIELDS" [".NOT"] SP header_list | "TEXT"
+section_part    : nz_number ("." nz_number)*
+section_spec    : section_msgtext | (section_part ["." section_text])
+section_text    : section_msgtext | "MIME"
+select          : "SELECT" SP mailbox
+seq_number      : nz_number | "*"
+seq_range       : seq_number ":" seq_number
+sequence_set    : (seq_number | seq_range) ["," sequence_set]
+status          : "STATUS" SP mailbox SP "(" status_att (SP status_att)* ")"
+status_att      : "MESSAGES" | "RECENT" | "UIDNEXT" | "UIDVALIDITY" | "UNSEEN"
+status_att_val  : ("MESSAGES" SP number) | ("RECENT" SP number) | ("UIDNEXT" SP nz_number) | ("UIDVALIDITY" SP nz_number) | ("UNSEEN" SP number)
+status_att_list :  status_att_val (SP status_att_val)*
+store           : "STORE" SP sequence_set SP store_att_flags
+store_att_flags : (["+" | "-"] "FLAGS" [".SILENT"]) SP (flag_list | (flag (SP flag)*))
+string          : quoted | literal
+subscribe       : "SUBSCRIBE" SP mailbox
+tag             : (/[\x21|\x23-\x24|\x26-\x27|\x2C-\x5B|\]-\x7A|\x7C-\x7E]/)+
+text            : TEXT_CHAR+
+TEXT_CHAR       : /[\x01-\x09|\x0B-\x0C|\x0E-\x7F]/
+time            : DIGIT~2 ":" DIGIT~2 ":" DIGIT~2
+uid             : "UID" SP (copy | fetch | search | store)
+uniqueid        : nz_number
+unsubscribe     : "UNSUBSCRIBE" SP mailbox
+userid          : astring
+x_command       : "X" atom
+zone            : ("+" | "-") DIGIT~4

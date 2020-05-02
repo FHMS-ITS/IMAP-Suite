@@ -1,0 +1,48 @@
+Kritische FETCH Attribute:
+- ALL (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE)
+	- RFC822.SIZE enthalten
+		- muss an len(FETCH RFC822) angepasst werden
+- FAST (FLAGS INTERNALDATE RFC822.SIZE)
+	- s. ALL
+- FULL (FLAGS INTERNALDATE RFC822.SIZE ENVELOPE BODY)
+	- RFC822.SIZE enthalten
+		- muss an len(FETCH RFC822) angepasst werden
+	- BODY enthalten
+		- (Datentyp muss ggf. geändert werden) ggf. muss "media-type" angepasst werden
+		- body-fld-octets muss an len(FETCH BODY[TEXT]) angepasst werden
+		- body-fld-lines apngepasst werden?!?!?
+- BODY --> muss BODY[TEXT] enthalten
+	- s. FULL -> BODY
+- BODY[] --> repsonse muss nur geändert werden
+	- enthält komplette Nachricht inkl. Header und TEXT
+		- neues Literal anhängen mit "dekodiertem" Text und neuer Länge von Header + Text
+		- (ungeparsed) ggf. muss Content-Type Header angepasst werden
+- BODY[HEADER] --> repsonse muss nur geändert werden
+	- (ungeparsed) ggf. muss Content-Type Header angepasst werden
+- BODY[TEXT] --> repsonse muss nur geändert werden
+	- enthält Nachricht
+		- neues Literal anhängen mit "dekodiertem" Text und neuer Länge von Text
+- BODY.PEEK[] --> repsonse muss nur geändert werden
+	- s. BODY[]
+- BODYSTRUCTURE --> muss BODY[TEXT] enthalten
+	- ggf. Datentyp (s. BODY)
+	- body-fld-octets muss an len(FETCH BODY[TEXT]) angepasst werden
+	- body-fld-lines apngepasst werden?!?!?
+- RFC822 (vgl. BODY[]) --> repsonse muss nur geändert werden
+	- enthält komplette Nachricht inkl. Header und TEXT
+		- neues Literal anhängen mit "dekodiertem" Text und neuer Länge von Header + Text
+		- (ungeparsed) ggf. muss Content-Type Header angepasst werden
+- RFC822.HEADER (vgl. BODY[HEADER]) --> repsonse muss nur geändert werden
+	- (ungeparsed) ggf. muss Content-Type Header angepasst werden
+- RFC822.SIZE --> muss RFC822 enthalten
+	- s. ALL oder FULL
+- RFC822.TEXT (vgl. BODY[TEXT]) --> repsonse muss nur geändert werden
+	-enthält Nachricht
+		- neues Literal anhängen mit "dekodiertem" Text und neuer Länge von Text
+
+
+
+- UID (safe)
+- ENVELOPE (safe)
+- FLAGS (safe)
+- INTERNALDATE (safe)
